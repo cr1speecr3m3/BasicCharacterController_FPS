@@ -23,17 +23,17 @@ public class player_animation_controller : MonoBehaviour
         bool rightPressed = Input.GetKey(KeyCode.D); //key for right strafe movement has been pressed
         bool runPressed = Input.GetKey(KeyCode.LeftShift); //key for running has been pressed
 
-        float currentMaxSpeed = runPressed ? max_run_speed : max_walk_speed; //determines the current max speed based on whether the run key is pressed
+        float currentMaxVelocity = runPressed ? max_run_speed : max_walk_speed; //determines the current max speed based on whether the run key is pressed
 
-        if (forwardPressed && velocity_z < currentMaxSpeed) //forward walking acceleration
+        if (forwardPressed && velocity_z < currentMaxVelocity) //forward walking acceleration
         {
             velocity_z += Time.deltaTime * acceleration;
         }
-        if (leftPressed && velocity_x > -currentMaxSpeed) //left strafe walking acceleration
+        if (leftPressed && velocity_x > -currentMaxVelocity) //left strafe walking acceleration
         {
             velocity_x -= Time.deltaTime * acceleration;
         }
-        if (rightPressed && velocity_x < currentMaxSpeed) //right strafe walking acceleration
+        if (rightPressed && velocity_x < currentMaxVelocity) //right strafe walking acceleration
         {
             velocity_x += Time.deltaTime * acceleration;
         }
@@ -57,12 +57,15 @@ public class player_animation_controller : MonoBehaviour
         {
             velocity_x = 0.0f;
         }
-        if (forwardPressed && runPressed && velocity_z > currentMaxSpeed) //hard stop for forward acceleration when running
+        if (forwardPressed && runPressed && velocity_z > currentMaxVelocity) //hard stop for forward acceleration when running
         {
-            velocity_z = currentMaxSpeed;
-        } else if (forwardPressed && !runPressed && velocity_z > currentMaxSpeed) //hard stop for forward acceleration when walking
+            velocity_z = currentMaxVelocity;
+        } else if (forwardPressed && velocity_z > currentMaxVelocity) //hard stop for forward acceleration when walking
         {
             velocity_z -= Time.deltaTime * deceleration;
+        } else if (forwardPressed && velocity_z < currentMaxVelocity && velocity_z > (currentMaxVelocity * -0.05)) //round to max velocity when within offset to prevent jittering
+        {
+            velocity_z = currentMaxVelocity;
         }
         animator.SetFloat("velocity_x", velocity_x);
         animator.SetFloat("velocity_z", velocity_z);
