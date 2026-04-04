@@ -82,14 +82,14 @@ public class player_animation_controller : MonoBehaviour
         if (leftPressed && runPressed && velocity_x > -currentMaxVelocity) //hard stop for forward acceleration when running
         {
             velocity_x = -currentMaxVelocity;
-        } else if (leftPressed && velocity_x > -currentMaxVelocity) //hard stop for forward acceleration when walking
+        } else if (leftPressed && velocity_x < -currentMaxVelocity) //hard stop for forward acceleration when walking
         {
-            velocity_x -= Time.deltaTime * deceleration;
-            if (velocity_x > -currentMaxVelocity && velocity_x > (-currentMaxVelocity - 0.05f)) //round to max velocity when within offset to prevent jittering
+            velocity_x += Time.deltaTime * deceleration;
+            if (velocity_x < -currentMaxVelocity && velocity_x > (-currentMaxVelocity - 0.05f)) //round to max velocity when within offset to prevent jittering
             {
                 velocity_x = -currentMaxVelocity;
             }
-        } else if (leftPressed && velocity_x < -currentMaxVelocity && velocity_x < (-currentMaxVelocity + 0.05f)) //round to max velocity when within offset to prevent jittering
+        } else if (leftPressed && velocity_x > -currentMaxVelocity && velocity_x < (-currentMaxVelocity + 0.05f)) //round to max velocity when within offset to prevent jittering
         {
             velocity_x = -currentMaxVelocity;
         }
