@@ -9,22 +9,20 @@ public class player_animation_controller : MonoBehaviour
     public float deceleration = 2.0f;
     public float max_walk_speed = 0.5f;
     public float max_run_speed = 2.0f;
+    private int velocity_z_hash;
+    private int velocity_x_hash;
 
     void Start()
     {
         animator = GetComponent<Animator>();
+
+        velocity_z_hash = Animator.StringToHash("velocity_z");
+        velocity_x_hash = Animator.StringToHash("velocity_x");
     }
 
-    void Update()
+    //applies acceleration to the player animation parameters
+    void applyAcceleration(bool forwardPressed, bool leftPressed, bool rightPressed, float currentMaxVelocity)
     {
-        bool forwardPressed = Input.GetKey(KeyCode.W); //key for forward movement has been pressed
-        bool backwardPressed = Input.GetKey(KeyCode.S); //key for backward movement has been pressed
-        bool leftPressed = Input.GetKey(KeyCode.A); //key for left strafe movement has been pressed
-        bool rightPressed = Input.GetKey(KeyCode.D); //key for right strafe movement has been pressed
-        bool runPressed = Input.GetKey(KeyCode.LeftShift); //key for running has been pressed
-
-        float currentMaxVelocity = runPressed ? max_run_speed : max_walk_speed; //determines the current max speed based on whether the run key is pressed
-
         if (forwardPressed && velocity_z < currentMaxVelocity) //forward walking acceleration
         {
             velocity_z += Time.deltaTime * acceleration;
@@ -37,8 +35,11 @@ public class player_animation_controller : MonoBehaviour
         {
             velocity_x += Time.deltaTime * acceleration;
         }
+    }
 
-
+    //applies deceleration to the player animation parameters
+    void applyDeceleration(bool forwardPressed, bool leftPressed, bool rightPressed)
+    {
         if (!forwardPressed && velocity_z > 0.0f) //deceleration for forward movement
         {
             velocity_z -= Time.deltaTime * deceleration;
@@ -51,7 +52,20 @@ public class player_animation_controller : MonoBehaviour
         {
             velocity_x -= Time.deltaTime * deceleration;
         }
+    }
+    
+    void Update()
+    {
+        bool forwardPressed = Input.GetKey(KeyCode.W); //key for forward movement has been pressed
+        bool backwardPressed = Input.GetKey(KeyCode.S); //key for backward movement has been pressed
+        bool leftPressed = Input.GetKey(KeyCode.A); //key for left strafe movement has been pressed
+        bool rightPressed = Input.GetKey(KeyCode.D); //key for right strafe movement has been pressed
+        bool runPressed = Input.GetKey(KeyCode.LeftShift); //key for running has been pressed
 
+        float currentMaxVelocity = runPressed ? max_run_speed : max_walk_speed; //determines the current max speed based on whether the run key is pressed
+
+        applyAcceleration(forwardPressed, leftPressed, rightPressed, currentMaxVelocity);
+        applyDeceleration(forwardPressed, leftPressed, rightPressed);
 
         if (!forwardPressed && velocity_z < 0.0f) //hard stop for forward movement deceleration
         {
@@ -61,7 +75,6 @@ public class player_animation_controller : MonoBehaviour
         {
             velocity_x = 0.0f;
         }
-
 
         if (forwardPressed && runPressed && velocity_z > currentMaxVelocity) //hard stop for forward acceleration when running
         {
@@ -79,7 +92,7 @@ public class player_animation_controller : MonoBehaviour
         }
 
 
-        if (leftPressed && runPressed && velocity_x > -currentMaxVelocity) //hard stop for forward acceleration when running
+        if (leftPressed && runPressed && velocity_x < -currentMaxVelocity) //hard stop for forward acceleration when running
         {
             velocity_x = -currentMaxVelocity;
         } else if (leftPressed && velocity_x < -currentMaxVelocity) //hard stop for forward acceleration when walking
@@ -111,7 +124,7 @@ public class player_animation_controller : MonoBehaviour
         }
 
         //set the velocity parameters in the animator to control the animation blending
-        animator.SetFloat("velocity_x", velocity_x);
-        animator.SetFloat("velocity_z", velocity_z);
+        animator.SetFloat(velocity_x_hash, velocity_x);
+        animator.SetFloat(velocity_z_hash, velocity_z);
     }
 }
